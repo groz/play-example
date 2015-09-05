@@ -22,6 +22,8 @@ angular.module("ChatApp", []).controller("ChatController", function($scope) {
 
   chat.currentUser = "";
 
+  chat.userCount = 1;
+
   chat.sendMessage = function() {
     var text = chat.currentUser + ": " + chat.currentMessage;
 
@@ -52,6 +54,10 @@ angular.module("ChatApp", []).controller("ChatController", function($scope) {
           console.log(command.data[m].data);
           addMessage(command.data[m].data);
         }
+        break;
+      case "Users":
+        console.log(command.data);
+        chat.userCount = parseInt(command.data);
         break;
     }
 

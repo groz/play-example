@@ -28,6 +28,13 @@ class ClientActor(out: ActorRef, chat: ActorRef) extends Actor {
         "data" -> JsArray(messages.map(_.json))
       ))
       out ! result
+
+    case Users(count) =>
+      val result = JsObject(Map(
+        "type" -> JsString("Users"),
+        "data" -> JsNumber(count)
+      ))
+      out ! result
   }
 
 }

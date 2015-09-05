@@ -6,6 +6,8 @@
 
         <div ng-controller="ChatController as chat">
 
+            <div>{{chat.userCount}}</div>
+
             <form>
                 <input type="text" placeholder="Enter name..." ng-model="chat.currentUser">
                 <input type="text" placeholder="Enter message..." ng-model="chat.currentMessage">

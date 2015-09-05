@@ -12,11 +12,16 @@ class Chat extends Actor {
   def process(subscribers: Set[ActorRef], messages: Queue[ClientMessage]): Receive = LoggingReceive {
 
     case Join =>
-      context become process(subscribers + sender, messages)
+      val newSubscribers = subscribers + sender
       sender ! MessageList(messages)
+      newSubscribers.foreach(_ ! Users(newSubscribers.size))
+      context become process(newSubscribers, messages)
 
     case Leave =>
-      context become process(subscribers - sender, messages)
+      val newSubscribers = subscribers - sender
+      subscribers.foreach(_ ! Users(newSubscribers.size))
+      context become process(newSubscribers, messages)
+
 
     case msg @ ClientMessage(json) =>
       (subscribers - sender).foreach { _ ! ClientMessage(json) }
