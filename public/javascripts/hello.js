@@ -16,7 +16,7 @@ angular.module("ChatApp", []).controller("ChatController", function($scope) {
 
   var chat = this;
 
-  chat.messages = ["a", "b"];
+  chat.messages = [];
 
   chat.currentMessage = "";
 
@@ -24,13 +24,37 @@ angular.module("ChatApp", []).controller("ChatController", function($scope) {
 
   chat.sendMessage = function() {
     var text = chat.currentUser + ": " + chat.currentMessage;
-    ws.send(text);
-    chat.messages.push(text);
+
+    var msg = {
+      type: "ClientMessage",
+      data: {user: chat.currentUser, text: chat.currentMessage}
+    };
+
+    ws.send(JSON.stringify(msg));
+    addMessage(msg.data);
     chat.currentMessage = "";
   };
 
+  var addMessage = function(m) {
+    chat.messages.push(m.user + ": " + m.text);
+  };
+
   ws.onmessage = function(msg) {
-    chat.messages.push(msg.data);
+    var command = JSON.parse(msg.data);
+
+    switch (command.type) {
+      case "ClientMessage":
+        addMessage(command.data);
+        break;
+      case "MessageList":
+        console.log(command.data);
+        for (var m in command.data) {
+          console.log(command.data[m].data);
+          addMessage(command.data[m].data);
+        }
+        break;
+    }
+
     $scope.$digest();
   };
 

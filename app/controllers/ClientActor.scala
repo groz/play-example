@@ -1,17 +1,31 @@
 package controllers
 
 import akka.actor.{Actor, ActorRef}
+import akka.event.LoggingReceive
+import play.api.libs.json._
 
 class ClientActor(out: ActorRef, chat: ActorRef) extends Actor {
 
   chat ! Join
 
-  override def receive: Receive = {
-    case text: String =>
-      chat ! ClientMessage(text)
+  override def postStop(): Unit = {
+    chat ! Leave
+  }
 
-    case ClientMessage(text) =>
+  override def receive: Receive = LoggingReceive {
+
+    case json: JsValue =>
+      chat ! ClientMessage(json)
+
+    case ClientMessage(text: JsValue) =>
       out ! text
+
+    case MessageList(messages: List[ClientMessage]) =>
+      val result = JsObject(Map(
+        "type" -> JsString("MessageList"),
+        "data" -> JsArray(messages.map(_.json))
+      ))
+      out ! result
   }
 
 }
