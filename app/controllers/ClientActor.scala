@@ -4,6 +4,8 @@ import akka.actor.{Actor, ActorRef}
 import akka.event.LoggingReceive
 import play.api.libs.json._
 
+import scala.collection.immutable.Queue
+
 class ClientActor(out: ActorRef, chat: ActorRef) extends Actor {
 
   chat ! Join
@@ -17,10 +19,10 @@ class ClientActor(out: ActorRef, chat: ActorRef) extends Actor {
     case json: JsValue =>
       chat ! ClientMessage(json)
 
-    case ClientMessage(text: JsValue) =>
-      out ! text
+    case ClientMessage(json: JsValue) =>
+      out ! json
 
-    case MessageList(messages: List[ClientMessage]) =>
+    case MessageList(messages: Queue[ClientMessage]) =>
       val result = JsObject(Map(
         "type" -> JsString("MessageList"),
         "data" -> JsArray(messages.map(_.json))
